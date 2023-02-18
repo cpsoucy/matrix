@@ -1,4 +1,3 @@
-//Includes/Namespace:
 #include <iostream>
 //#include <random>
 //#include <string>
@@ -9,30 +8,59 @@
 #include <vector>
 using namespace std;
 
+//***explain what each line does, will make talking about during the code review much easier;
+
 //Constants/Defines:
 //#define NUM_THREADS 5;
 
 typedef struct param_struct {
   int i;
   int j;
+
 } param_t;
 
 //Global Variables:
-int* mm1; //= malloc(sizeof(m1_row * m2_col);
 int m1_row, m2_row;
 int m1_col, m2_col;
+int* mm1;
+//int **mm1 = malloc(sizeof(m1_row * m2_col));
 param_t* param = (param_t*)malloc(sizeof(param_t));
 
+//Functions:
+//func1 does...
+//void func1() {
+
+//}
+
+//param_t* param = (param_t*)malloc(sizeof(param_t));
+
+int** create_matrix(int i, int j) {
+  //  int (*arr)[mm1] = malloc(sizeof(int[i][j]));
+  // int ** ptr = static_cast<int*>(malloc(i*j*sizeof(int)));
+
+  int ** ptr = new int*[m1_row];
+
+  for (int i = 0; i < m1_row; i++) {
+    ptr[i] = new int[m2_col];
+  }
+
+  //  for (int i = 0; i < param; i++) {
+  //mm1[i] = malloc(param * sizeof(int));
+  //  }
+}
+
 void* print_message_function (void *ptr) {
+  //  cout << "in print function" << endl;
+
   for (int i = 0; i < m1_col; i++){
     //    mm1[param -> i][i];
     cout << mm1[param -> i] << endl;
   }
-   //  } param_t;
-   //  int* mm1;
-  
+    //  } param_t;
+  //  int* mm1;
+
+
   //mm1[i]
-  
   param = (param_t*) ptr;
 
   printf("i=%d,j=%d\n",param->i,param->j);
@@ -41,6 +69,7 @@ void* print_message_function (void *ptr) {
 
 //Main:
 int main() {
+//explain what everything does here;
 
 //Variables needed for main:
 //  int m1_row, m2_row, m1_col, m2_col = 0;
@@ -65,10 +94,12 @@ int main() {
 
     num_threads = (m1_row * m2_col);
 
-//2) program verifies that it can actually multiple the two matricies (# of rows in matrix 1 matches # of columns in matrix 2);
+//2) program verifies that it can actually multiple the two matricies (# of rows in matrix 1 matches # of columns in\
+ matrix 2);
 
     if (m1_row != m2_col) {
-      cout << "Try again. The number of rows in the first matrix needs to match the number of columns in the second matrix.";
+      cout << "Try again. The number of rows in the first matrix needs to match the number of columns in the second \
+matrix.";
       cout << " " << endl;
     }
 
@@ -77,7 +108,6 @@ int main() {
       cout << endl;
     }
   }
-
   cout << endl;
 
 //3) The program fills both matricies with random numbers and prints them to the screen;
@@ -105,15 +135,15 @@ int main() {
     for (int j = 0; j < m2_col; j++) {
       m2[i][j] = (rand() % 10);
       cout << m2[i][j] << " ";
-      result += (m1[i]) + m2[j]; //* m2[j]);
+      //      result += (m1[i]) + m2[j]; //* m2[j]);
     }
     cout << endl;
   }
   cout << endl;
 
-  cout << "total result: " << result << endl;
+  //  cout << "total result: " << result << endl;
 
-//4)Use pthreads to parallelize the matrix multiplication and dot product result matrix generation:
+  //4)Use pthreads to parallelize the matrix multiplication and dot product result matrix generation:
     //-Each row and column dot product process should be handled by an individual thread, in parallel;
     //-Once all threads have finished, the final result matrix can be printed to the screen;
 
@@ -130,9 +160,12 @@ int main() {
     for (int j = 0; j < m2_col; j++) {
     //  pthread_t thread[i];
     // int iret[i];
-      //param_t* param = (param_t*)malloc(sizeof(param_t));
-    param -> i = i;
-    param -> j = j;
+
+
+      param_t* param = (param_t*)malloc(sizeof(param_t));
+      param -> i = i;
+      param -> j = j;
+
     pthread_create(&thread[i][j], NULL, print_message_function, (void*) param);
    //pthread_join(thread[i], NULL);
   }
@@ -140,14 +173,15 @@ int main() {
 
   for (int i = 0; i < m1_row; i++) {
     for (int j = 0; j < m2_col; j++) {
-      cout << i << endl;
       //  pthread_t thread[i];
       pthread_join(thread[i][j], NULL);
-      cout << i << endl;
+      //cout << i << endl;
     }
   }
 
-  cout << print_message_function(param) << endl;
+  //  int** mm1 = create_matrix(m1_row, m2_col);
+
+  //  cout << print_message_function(param) << endl;
 
 //return:
   return 0;
