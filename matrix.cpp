@@ -1,6 +1,13 @@
+//Operating Systems - CS444;
+//Spring 2023;
+//Christian Soucy;
+//Assignment Info: Matrix Multiplication (Threading), Due 02/19/2023;
+//Program Description: Using the pthreads library to perform matrix multiplication;
+//Last modified: 02/19/2023, 9:18 pm;
+//Youtube Code Review & Demo Link: https://youtu.be/GV91zWLiR_M
+
+//Includes/Namespace://
 #include <iostream>
-//#include <random>
-//#include <string>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -8,190 +15,142 @@
 #include <vector>
 using namespace std;
 
-//Constants/Defines:
-//#define NUM_THREADS 5;
-
+//This struct holds the data for each element in the resulting matrix;
 typedef struct param_struct {
-  int i;
-  int j;
-
+  int i; //represents the row of the resulting matrix;
+  int j; //represents the column of the resulting matrix;
 } param_t;
 
-//Global Variables:
-int m1_row, m2_row;
-int m1_col, m2_col;
-int* mm1;
-//int **mm1 = malloc(sizeof(m1_row * m2_col));
-param_t* param = (param_t*)malloc(sizeof(param_t));
 
-//Functions:
-//func1 does...
-//void func1() {
+//Global Variables://
+int m1_row, m2_row; //row variables for the two randomly generated arrays;
+int m1_col, m2_col; //col variables for the two randomly generated arrays;
+int **mm1, **mm2, **result; //variables to generate the two arrays, as well as the resulting array;
 
-//}
 
-//param_t* param = (param_t*)malloc(sizeof(param_t));
+//Functions://
+//this function takes the rows/columns of the matrix to generate the array, so it is able to be printed to the terminal;
+int **create_matrix(int rows, int cols) {
+  int **ptr = new int *[rows]; //creating a pointer that points to a pointer of the rows in the matrix;
 
-int** create_matrix(int i, int j) {
-  //  int (*arr)[mm1] = malloc(sizeof(int[i][j]));
-  // int ** ptr = static_cast<int*>(malloc(i*j*sizeof(int)));
-
-  int ** ptr = new int*[m1_row];
-
-  for (int i = 0; i < m1_row; i++) {
-    ptr[i] = new int[m2_col];
+  for (int i = 0; i < rows; i++) { //increments through the # of rows in the matrix;
+    ptr[i] = new int[cols]; //assigns the row value of the pointer to a column value;
   }
-  
-    //  for (int i = 0; i < param; i++) {
-  //mm1[i] = malloc(param * sizeof(int));
-  //  }
+
+  return ptr; //returns the pointer;
 }
 
-void* print_message_function (void *ptr) {
-  cout << "in print function" << endl;
 
-  for (int i = 0; i < m1_col; i++){
-    //    mm1[param -> i][i];
-    cout << "here5" << endl;
-    //    cout << mm1[ptr -> i] << endl;       //*******void is not a pointer to object type error;
+//this function takes the ptr returned from the create_matrix function and multiplies the two matricies together;
+//then, the resulting dot product matrix produced is printed to the terminal;
+void* threading_func (void *ptr) {
+  param_t *param = (param_t *) ptr; //setting the variable param equal to the value of the pointer;
 
-    //   cout << mm1[param -> i] << endl;
+  for (int k = 0; k < m1_col; k++) { //increments through the # of columns of the first matrix;
+    result[param -> i][param -> j] += mm1[param -> i][k] * mm2[k][param -> j]; //calculates the dot product, and sets that value equal to the resulting matrix, so it can be printed out later;
   }
-    //  } param_t;
-  //  int* mm1;
 
-
-  //mm1[i]
-  param = (param_t*) ptr;
-
-  printf("i=%d,j=%d\n",param->i,param->j);
-  // return 0;
+  pthread_exit(0); //exits the threads after they're done being used, cleanup and destructor runs;
 }
 
-//Main:
+
+//Main Function://
 int main() {
-
 //Variables needed for main:
-//  int m1_row, m2_row, m1_col, m2_col = 0;
-  bool again = true;
-  pthread_t thread1, thread2;
-  char *message1 = "Thread 1";
-  char *message2 = "Thread 2";
-  int num_threads;
-
+  bool again = true; //variable incase the user inputs the matricies incorrectly;
+  int num_threads; //used to determine how many threads are needed to generate resulting matrix;
 
 //1) prompt user to input the sizes of two matricies:
-
-  while (again) {
+  while (again) { //while loop incase user incorrectly inputs matrix sizes:
     cout << "Enter how many rows matrix one will contain: ";
-    cin >> m1_row;
+    cin >> m1_row; //user inputs how many rows they want the first matrix to have;
     cout << "Enter how many columns matrix one will contain: ";
-    cin >> m1_col;
+    cin >> m1_col; //user inputs how many columns they want the first matrix to have;
     cout << "Enter how many rows matrix two will contain: ";
-    cin >> m2_row;
+    cin >> m2_row; //user inputs how many rows they want the second matrix to have;
     cout << "Enter how many columns matrix two will contain: ";
-    cin >> m2_col;
+    cin >> m2_col; //user inputs how many columns they want the second matrix to have;
 
-    num_threads = (m1_row * m2_col);
+    num_threads = (m1_row * m2_col); //calculates how many threads are needed;
 
-  //2) program verifies that it can actually multiple the two matricies (# of rows in matrix 1 matches # of columns in\
- matrix 2);
 
-    if (m1_row != m2_col) {
-      cout << "Try again. The number of rows in the first matrix needs to match the number of columns in the second \
-matrix.";
+//---------------------------------------------------------------------------------
+//2) program verifies that it can actually multiple the two matricies (# of rows in matrix 1 matches # of columns in matrix 2);
+
+    if (m1_row != m2_col) { //checks if user incorrectly inputs matrix sizes;
+      cout << "Try again. The number of rows in the first matrix needs to match the number of columns in the second matrix.";
       cout << " " << endl;
     }
 
     else {
-      again = false;
+      again = false; //if matrix sizes were incorrect, this makes the while run again until they input the correct sizes
       cout << endl;
     }
   }
-
   cout << endl;
 
+
+//---------------------------------------------------------------------------------
 //3) The program fills both matricies with random numbers and prints them to the screen;
 
-  srand(time(0));
-
-  int m1[m1_row][m1_col];
-  int m2[m2_row][m2_col];
-  int result[m1_row][m2_col];
-
-  // int* mm1 = malloc();
+  srand(time(0)); //checks the current time to produce psuedo-random numbers for the STL rand() function;
+  
+  mm1 = create_matrix(m1_row, m1_col); //generates the structure for the first matrix;
+  mm2 = create_matrix(m2_row, m2_col); //generates the structure for the second matrix;
+  result = create_matrix(m1_row, m2_col); //generates the structure for the resulting matrix;
 
   cout << "Matrix One: " << endl;
-  for (int i = 0; i < m1_row; i++) {
-    for (int j = 0; j < m1_col; j++) {
-      m1[i][j] = (rand() % 10);
-      cout << m1[i][j] << " ";
+  for (int i = 0; i < m1_row; i++) { //increments through the number of rows of the first matrix;
+    for (int j = 0; j < m1_col; j++) { //increments through the number of columns of the first matrix;
+      mm1[i][j] = (rand() % 10); //generates numbers using the rand() function to fill the first matrix;
+      cout << mm1[i][j] << " "; //outputs the resulting matrix to the terminal;
     }
-    cout << endl;
+    cout << endl; //after every row is printed, the next line is printed, thus generating the columns;
   }
   cout << endl;
 
   cout << "Matrix Two: " << endl;
-  for (int i = 0; i < m2_row; i++) {
-    for (int j = 0; j < m2_col; j++) {
-      m2[i][j] = (rand() % 10);
-      cout << m2[i][j] << " ";
-      //      result += (m1[i]) + m2[j]; //* m2[j]);
+  for (int i = 0; i < m2_row; i++) { //increments through the number of rows of the second matrix;
+    for (int j = 0; j < m2_col; j++) { //increments through the number of columns of the second matrix;
+      mm2[i][j] = (rand() % 10); //generates numbers using the rand() function to fill the second matrix;
+      cout << mm2[i][j] << " "; //outputs the resulting matrix to the terminal;
     }
-    cout << endl;
+    cout << endl; //after every row is printed, the next line is printed, thus generating the columns;
   }
   cout << endl;
 
-  //  cout << "total result: " << result << endl;
+//---------------------------------------------------------------------------------
+//4)The program uses pthreads to parallelize the matrix multiplication/dot product result matrix generation:
 
-//4)Use pthreads to parallelize the matrix multiplication and dot product result matrix generation:
-    //-Each row and column dot product process should be handled by an individual thread, in parallel;
-    //-Once all threads have finished, the final result matrix can be printed to the screen;
+   pthread_t resulting_thread[m1_row][m2_col]; //thread that multiplies the two matricies together to create the resulting matrix;
 
-  //a new thread should be generated for each resulting matrix square;
-  //so if matrix 1 is 2x3, and matrix 2 is 3x2, resulting matrix is 2x2;
-  //meaning 4 threads should be created and multiplying the rows by columns to get the solution;
+  for (int i = 0; i < m1_row; i++) { //increments through the number of rows of the first matrix;
+    for (int j = 0; j < m2_col; j++) { //increments through the number of columns of the second matrix;
+      param_t *param = (param_t *)malloc(sizeof(param_t)); //allocates memory  to the resulting matrix using malloc()
+      param -> i = i; //dereferencing the pointer from the struct to i;
+      param -> j = j; //dereferencing the pointer from the struct to j;
 
-  //  int *message;
-  //  pthread_t thread;
-  //  int iret;
-
-  pthread_t thread[m1_row][m2_col];
-
-  for (int i = 0; i < m1_row; i++) {
-    for (int j = 0; j < m2_col; j++) {
-    //  pthread_t thread[i];
-    // int iret[i];
-
-      cout << "here2" << endl;
-
-      param_t* param = (param_t*)malloc(sizeof(param_t));
-      param -> i = i;
-      param -> j = j;
-
-      //      pthread_create(&thread[i][j], NULL, print_message_function, (void*) param);
-      //pthread_join(thread[i], NULL);
-      cout << "here3" << endl;
+      //creates a thread for each dot product of the two given matricies:
+      pthread_create(&resulting_thread[i][j], NULL, threading_func, (void *) param);
     }
   }
 
-  /*  for (int i = 0; i < m1_row; i++) {
-    for (int j = 0; j < m2_col; j++) {
-            cout << "here4" << endl;
-            //pthread_join(thread[i], NULL);
-      pthread_join(thread[i][j], NULL);
-      //cout << i << endl;
+  for (int i = 0; i < m1_row; i++) { //increments through the number of rows of the first matrix;
+    for (int j = 0; j < m2_col; j++) { //increments through the number of columns of the second matrix;
+      pthread_join(resulting_thread[i][j], NULL); //joins the thread, prints any errors that occurs within thread generation;
     }
   }
-  */
 
-  int** mm1 = create_matrix(m1_row, m2_col);
-  //  cout << print_message_function(param) << endl;
-  cout << print_message_function(mm1) << endl;
-
-  cout << "program ending" << endl;
-
-//return:
+  cout << "Resulting matrix: " << endl;
+  for (int i = 0; i < m1_row; i++) { //increments through the # of rows in the first matrix;
+    for (int j = 0; j < m2_col; j++) { //increments through the # of columns in the second matrix;
+      cout << result[i][j] << " "; //outputs the resulting matrix to the terminal;
+    }
+    cout << endl; //after every row is printed, the next line is printed, thus generating the columns;
+  }
+  cout << endl;
+  
+//Return://
   return 0;
 }
 
